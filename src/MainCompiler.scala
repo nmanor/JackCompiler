@@ -7,7 +7,8 @@ object MainCompiler {
     print("Enter the path of the directory: ")
     val path = StdIn.readLine()
     var i = 1
-    for(file <- getListOfFiles(path)) {
+
+    for (file <- getListOfFiles(path)) {
       // TODO: convert the file from VM file to ASM file
       println("File")
     }
