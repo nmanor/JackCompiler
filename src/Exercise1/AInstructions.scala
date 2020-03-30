@@ -2,8 +2,6 @@ package Exercise1
 
 object AInstructions {
 
-  // פונקציות של נתן
-
   def lt(instruction: Int): String = {
     var lt = "@SP\n" // get the location of the first empty place in the stack (SP)
     lt += "A=M-1\n" // get the location of the 1st value in the stack
