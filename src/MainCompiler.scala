@@ -15,12 +15,7 @@ object MainCompiler {
   }
 
   def compileToASM(file: File): Unit = {
-    var asmCode =
-      """@20
-        |D=A
-        |@0
-        |M=D
-        |""".stripMargin
+    var asmCode = ""
     var lineNum = 0
     val fileContent = Source.fromFile(file)
 
@@ -34,13 +29,21 @@ object MainCompiler {
 
       // call to the right function and add it to the asm code
       words(0) match {
+        case "add" => asmCode += add()
+        case "sub" => asmCode += sub()
+        case "neg" => asmCode += neg()
+        case "eq" => asmCode += eql(lineNum)
+        case "gt" => asmCode += gt(lineNum)
         case "lt" => asmCode += lt(lineNum)
         case "and" => asmCode += and()
         case "or" => asmCode += or()
         case "not" => asmCode += not()
+        case "pop" => asmCode += pop(words(1), words(2).toInt, file.getName)
         case "push" => asmCode += push(words(1), words(2).toInt, file.getName)
+        case "//" | "" =>
         case _ => throw new Exception("Unknown VM instruction at line " + lineNum)
       }
+
     }
 
     // close the open file

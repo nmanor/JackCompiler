@@ -9,10 +9,10 @@ object AInstructions {
       pop += "D=A\n" // move the offset into D
       pop += "@" + segment + "\n" // load the address of segment into A
       pop += "D=M+D\n" // calculate the segment + offset into D
-      pop += "@13\n" // load the temporary into A
+      pop += "@R13\n" // load the temporary into A
       pop += "M=D\n" // save the data of segment + offset into the temp room
       pop += "@SP\n" // load the SP into A
-      pop += "M=M-1\n" // decrease the sp by 1
+      pop += "M=M-1\n" // decrease the SP by 1
       pop += "A=M\n" // load the pointer of the next free room
       pop += "D=M\n" // save the data of segment + offset into the free room
       pop += "@13\n" // load the SP into A
@@ -32,13 +32,13 @@ object AInstructions {
       else
       pop += "@5\n" // load the temp value (5) into A
       pop += "D=A+D\n" // calculate the value of segment + offset
-      pop += "@13\n" // load SP into A
+      pop += "@R13\n" // load SP into A
       pop += "M=D\n" // get the next free room pointer into A
       pop += "@SP\n" // load the SP into A
       pop += "M=M-1\n" // move the pointer to the next free room
       pop += "A=M\n" // get the next free room pointer into A
       pop += "D=M\n" // load the SP into A
-      pop += "@13\n" // load SP into A
+      pop += "@R13\n" // load SP into A
       pop += "A=M\n" // get the next free room pointer into A
       pop += "M=D\n" // get the next free room pointer into A
 
@@ -60,7 +60,7 @@ object AInstructions {
     }
 
     def constantLevel(value: Int): String = {
-      var pop = "@sp\n" // load the value into A
+      var pop = "@SP\n" // load the value into A
       pop += "M=M-1\n" // put the value from A into D
 
       // return the result to the main program
@@ -79,73 +79,91 @@ object AInstructions {
 
   def gt(instruction: Int): String = {
     var gt = "@SP\n" // get the location of the first empty place in the stack (SP)
-    gt += "M=M-1\n" // change to the location of the 1st value in the stack and thats where it needs to be at the end
-    gt += "A=M\n" // get the loction of the 1st value
+    gt += "A=M-1\n" // get the location of the 1st value in the stack
     gt += "D=M\n" // get the value of the 1st
-    gt += "A=A-1\n" // get the location of the 2nd value
+    gt += "A=A-1\n" // get the location of the 2nd
     gt += "D=D-M\n" // subtract the 2nd from the 1st
-    gt += "@GT_" + instruction + "\n" // load the location of the code if GT is true
-    gt += "D;JGT\n" // jump to the label if X is really GT then Y
-    gt += "@NOT_GT_" + instruction + "\n" // load the location of the code if GT is false
-    gt += "D=0;JEQ\n" // load FALSE into D and jump to the false loction
-    gt += "(GT_" + instruction + ")\n" // set the label for GT
-    gt += "D=-1\n" // load TRUE into D
-    gt += "(NOT_GT_" + instruction + ")\n" // set the label for NOT GT
+    gt += "@GT_" + instruction + "\n" // load the location of the code if LT is true
+    gt += "D;JLE\n" // jump to the label if X is really LT then Y
+    gt += "D=0\n" // load FALSE into D
+    gt += "@SP\n" // load the location of SP into A
+    gt += "A=M-1\n" // load the address of the 1st value in the stack
+    gt += "A=A-1\n" // get the location of the 2nd
     gt += "M=D\n" // put the result in the 2nd place
+    gt += "@NOT_GT_" + instruction + "\n" // load the location of the code if LT is false
+    gt += "0;JMP\n" // unconditional jump
+    gt += "(GT_" + instruction + ")\n" // set the label
+    gt += "D=-1\n" // load TRUE into D
+    gt += "@SP\n" // load the location of SP into A
+    gt += "A=M-1\n" // load the address of the 1st value in the stack
+    gt += "A=A-1\n" // get the location of the 2nd
+    gt += "M=D\n" // put the result in the 2nd place
+    gt += "(NOT_GT_" + instruction + ")\n" // set the label
+    gt += "@SP\n" // load the location of SP into A
+    gt += "M=M-1\n" // save the new SP
 
     // return the result to the main program
     gt
   }
 
-  def eq(instruction: Int): String = {
-    var eq = "@sp\n" //A=0 the location of the stack pointer
-    eq += "M=M-1\n" //decrease the stack pointer by 1 and thats where it needs to be at the end
-    eq += "A=M\n" //dump the loction the sp is pointing at to A
-    eq += "D=M\n" //dump into D the first value
-    eq += "A=A-1\n" //get the loction of the second value
-    eq += "D=M-D\n" //dump into D the value of V1-V2
+  def eql(instruction: Int): String = {
+    var eq = "@SP\n" // get the location of the first empty place in the stack (SP)
+    eq += "A=M-1\n" // get the location of the 1st value in the stack
+    eq += "D=M\n" // get the value of the 1st
+    eq += "A=A-1\n" // get the location of the 2nd
+    eq += "D=D-M\n" // subtract the 2nd from the 1st
     eq += "@EQ_" + instruction + "\n" // load the location of the code if EQ is true
-    eq += "D;JEQ" //if eq is true jump to the loction in A
+    eq += "D;JEQ\n" // jump to the label if X is really LT then Y
+    eq += "D=0\n" // load FALSE into D
+    eq += "@SP\n" // load the location of SP into A
+    eq += "A=M-1\n" // load the address of the 1st value in the stack
+    eq += "A=A-1\n" // get the location of the 2nd
+    eq += "M=D\n" // put the result in the 2nd place
     eq += "@NOT_EQ_" + instruction + "\n" // load the location of the code if EQ is false
-    eq += "D=0;JEQ\n" //load FALSE into D and jump to the false loction
-    eq += "(EQ_" + instruction + ")\n" // set the label for EQ
-    eq += "D=-1\n" //loat true to D
-    eq += "(NOT_EQ_" + instruction + ")\n" // set the label for NOT_EQ
-    eq += "M=D\n" //load the result into the stack
+    eq += "0;JMP\n" // unconditional jump
+    eq += "(EQ_" + instruction + ")\n" // set the label
+    eq += "D=-1\n" // load TRUE into D
+    eq += "@SP\n" // load the location of SP into A
+    eq += "A=M-1\n" // load the address of the 1st value in the stack
+    eq += "A=A-1\n" // get the location of the 2nd
+    eq += "M=D\n" // put the result in the 2nd place
+    eq += "(NOT_EQ_" + instruction + ")\n" // set the label
+    eq += "@SP\n" // load the location of SP into A
+    eq += "M=M-1\n" // save the new SP
 
     // return the result to the main program
     eq
   }
 
   def neg(): String = {
-    var neg = "@sp\n" //A=0 the location of the stack pointer
-    neg += "A=M-1\n"    //dump the loction the sp is pointing at to A
-    neg += "D=M\n"    //get the value into D
-    neg += "M=-D\n"  //dump into the same location the value of -V
+    var neg = "@SP\n" //A=0 the location of the stack pointer
+    neg += "A=M-1\n" //dump the loction the SP is pointing at to A
+    neg += "D=M\n" //get the value into D
+    neg += "M=-D\n" //dump into the same location the value of -V
 
     // return the result to the main program
     neg
   }
 
   def sub(): String = {
-    var sub = "@sp\n" //A=0 the location of the stack pointer
-    sub += "M=M-1\n"  //decrease the stack pointer by 1 and thats where it needs to be at the end
-    sub += "A=M\n"    //dump the loction the sp is pointing at to A
-    sub += "D=M\n"    //get the second value into D
-    sub += "A=A-1\n"  //get the loction of the first value
-    sub += "M=M-D\n"  //dump into the same location the value of V1-V2
+    var sub = "@SP\n" //A=0 the location of the stack pointer
+    sub += "M=M-1\n" //decrease the stack pointer by 1 and thats where it needs to be at the end
+    sub += "A=M\n" //dump the loction the SP is pointing at to A
+    sub += "D=M\n" //get the second value into D
+    sub += "A=A-1\n" //get the loction of the first value
+    sub += "M=M-D\n" //dump into the same location the value of V1-V2
 
     // return the result to the main program
     sub
   }
 
   def add(): String = {
-    var add = "@sp\n" //A=0 the location of the stack pointer
-    add += "M=M-1\n"  //decrease the stack pointer by 1 and thats where it needs to be at the end
-    add += "A=M\n"    //dump the loction the sp is pointing at to A
-    add += "D=M\n"    //get the first value into D
-    add += "A=A-1\n"  //get the loction of the second value
-    add += "M=D+M\n"  //dump into the same location the value of V1+V2
+    var add = "@SP\n" //A=0 the location of the stack pointer
+    add += "M=M-1\n" //decrease the stack pointer by 1 and thats where it needs to be at the end
+    add += "A=M\n" //dump the loction the SP is pointing at to A
+    add += "D=M\n" //get the first value into D
+    add += "A=A-1\n" //get the loction of the second value
+    add += "M=D+M\n" //dump into the same location the value of V1+V2
 
     // return the result to the main program
     add
@@ -158,7 +176,7 @@ object AInstructions {
     lt += "A=A-1\n" // get the location of the 2nd
     lt += "D=D-M\n" // subtract the 2nd from the 1st
     lt += "@LT_" + instruction + "\n" // load the location of the code if LT is true
-    lt += "D;JLT\n" // jump to the label if X is really LT then Y
+    lt += "D;JGE\n" // jump to the label if X is really LT then Y
     lt += "D=0\n" // load FALSE into D
     lt += "@SP\n" // load the location of SP into A
     lt += "A=M-1\n" // load the address of the 1st value in the stack
