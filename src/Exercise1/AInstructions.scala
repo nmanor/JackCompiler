@@ -1,37 +1,37 @@
 package Exercise1
 
+import scala.collection.immutable.HashMap
+
 object AInstructions {
-  ///  pop
-  def pop(segment: String, offset: Int, fileName: String): String = {
+  val asmNameOf = HashMap("local" -> "LCL", "argument" -> "ARG", "this" -> "THIS", "that" -> "THAT", "temp" -> "TMP")
+
+  def pop(segment: String, offset: Int, fileName: String, lineNum: Int): String = {
     // function for function-level segments: local / argument / this / that
     def functionLevel(segment: String, offset: Int): String = {
       var pop = "@" + offset + "\n" // load the offset into A
       pop += "D=A\n" // move the offset into D
-      pop += "@" + segment + "\n" // load the address of segment into A
-      pop += "D=M+D\n" // calculate the segment + offset into D
+      pop += "@" + asmNameOf(segment) + "\n" // load the address of segment into A
+      pop += "D=M+D\n" // calculate the segment[offset] into D
       pop += "@R13\n" // load the temporary into A
-      pop += "M=D\n" // save the data of segment + offset into the temp room
+      pop += "M=D\n" // save the data of segment[offset] into the temp room
       pop += "@SP\n" // load the SP into A
       pop += "M=M-1\n" // decrease the SP by 1
       pop += "A=M\n" // load the pointer of the next free room
-      pop += "D=M\n" // save the data of segment + offset into the free room
+      pop += "D=M\n" // save the data of segment[offset] into the free room
       pop += "@13\n" // load the SP into A
       pop += "A=M\n" // load the pointer of the next free room
-      pop += "M=D\n" // save the data of segment + offset into the free room
+      pop += "M=D\n" // save the data of segment[offset] into the free room
 
       // return the result to the main program
       pop
     }
 
     // function for pointer / temp segments
-    def pointerTempLevel(segment: String, offset: Int): String = {
+    def tempLevel(offset: Int): String = {
       var pop = "@" + offset + "\n" // load the offset into A
       pop += "D=A\n" // store the offset in D
-      if (segment.equals("pointer"))
-        pop += "@3\n" // load the pointer value (3) into A
-      else
-      pop += "@5\n" // load the temp value (5) into A
-      pop += "D=A+D\n" // calculate the value of segment + offset
+      pop += "@5\n" // load the temp into A
+      pop += "D=A+D\n" // calculate the value of segment[offset]
       pop += "@R13\n" // load SP into A
       pop += "M=D\n" // get the next free room pointer into A
       pop += "@SP\n" // load the SP into A
@@ -41,6 +41,22 @@ object AInstructions {
       pop += "@R13\n" // load SP into A
       pop += "A=M\n" // get the next free room pointer into A
       pop += "M=D\n" // get the next free room pointer into A
+
+      // return the result to the main program
+      pop
+    }
+
+    def pointerLevel(offset: Int): String = {
+      var pop = "@SP\n" // load the SP into A
+      pop += "A=M-1\n" // get the pointer to the 1st place
+      pop += "D=M\n" // get the value of the 1st place
+      if (offset == 0)
+        pop += "@THIS\n" // load the pointer of THIS
+      else
+      pop += "@THAT\n" // load the pointer of THAT
+      pop += "M=D\n" // save the value of D in the pointer
+      pop += "@SP\n" // load the SP into A
+      pop += "M=M-1\n" // change SP
 
       // return the result to the main program
       pop
@@ -68,13 +84,103 @@ object AInstructions {
     }
 
     // return the result of the right segment type
-    if (segment.equals("local") || segment.equals("argument") || segment.equals("this") || segment.equals("that"))
-      return functionLevel(segment, offset)
-    if (segment.equals("pointer") || segment.equals("temp"))
-      return pointerTempLevel(segment, offset)
-    if (segment.equals("static"))
-      return staticLevel(fileName, offset)
-    constantLevel(offset)
+    segment match {
+      case "local" | "argument" | "this" | "that" => functionLevel(segment, offset)
+      case "temp" => tempLevel(offset)
+      case "pointer" => pointerLevel(offset)
+      case "static" => staticLevel(fileName, offset)
+      case _ => throw new Exception("Unknown VM segment \"" + segment + "\" at line " + lineNum + " in " + fileName)
+    }
+  }
+
+  def push(segment: String, offset: Int, fileName: String, lineNum: Int): String = {
+    // function for function-level segments: local / argument / this / that
+    def functionLevel(segment: String, offset: Int): String = {
+      var push = "@" + offset + "\n" // load the offset into A
+      push += "D=A\n" // move the offset into D
+      push += "@" + asmNameOf(segment) + "\n" // load the address of segment into A
+      push += "A=M+D\n" // calculate the segment[offset] into A
+      push += "D=M\n" // load the data of segment[offset] into D
+      push += "@SP\n" // load the SP into A
+      push += "A=M\n" // load the pointer of the next free room
+      push += "M=D\n" // save the data of segment[offset] into the free room
+      push += "@SP\n" // load the SP into A
+      push += "M=M+1\n" // move the pointer to the next free room
+
+      // return the result to the main program
+      push
+    }
+
+    // function for pointer / temp segments
+    def tempLevel(offset: Int): String = {
+      var push = "@" + offset + "\n" // load the offset into A
+      push += "D=A\n" // store the offset in D
+      push += "@5\n" // load the temp value (5) into A
+      push += "A=A+D\n" // calculate the value of segment[offset]
+      push += "D=M\n" // load the data of segment[offset] into D
+      push += "@SP\n" // load SP into A
+      push += "A=M\n" // get the next free room pointer into A
+      push += "M=D\n" // store the data of segment[offset] from D into the free room
+      push += "@SP\n" // load the SP into A
+      push += "M=M+1\n" // move the pointer to the next free room
+
+      // return the result to the main program
+      push
+    }
+
+    def pointerLevel(offset: Int): String = {
+      var push = "@" // load the segment pointer
+      if (offset == 0)
+        push += "THIS\n"
+      else
+        push += "THAT\n"
+      push += "D=M\n" // load the value of the pointer into D
+      push += "@SP\n" // load SP into A
+      push += "A=M\n" // get the pointer to the next free space
+      push += "M=D\n" // place the value from D into the free room
+      push += "@SP\n" // load SP into A
+      push += "M=M+1\n" // move the pointer to the next free space
+
+      // return the result to the main program
+      push
+    }
+
+    // function for static segments
+    def staticLevel(fileName: String, offset: Int): String = {
+      var push = "@" + fileName + "." + offset + "\n" // load the pointer to fileName.offset into A
+      push += "D=M\n" // store the value of fileName.offset into D
+      push += "@SP\n" // load SP into A
+      push += "A=M\n" // get the next free room pointer into A
+      push += "M=D\n" // store the data of fileName.offset from D into the free room
+      push += "@SP\n" // load the SP into A
+      push += "M=M+1\n" // move the pointer to the next free room
+
+      // return the result to the main program
+      push
+    }
+
+    def constantLevel(value: Int): String = {
+      var push = "@" + value + "\n" // load the value into A
+      push += "D=A\n" // put the value from A into D
+      push += "@SP\n" // get the SP into A
+      push += "A=M\n" // load the next free room into A
+      push += "M=D\n" // store value from D into the free room
+      push += "@SP\n" // get the SP into A
+      push += "M=M+1\n" // move the pointer to the next free room
+
+      // return the result to the main program
+      push
+    }
+
+    // return the result of the right segment type
+    segment match {
+      case "local" | "argument" | "this" | "that" => functionLevel(segment, offset)
+      case "temp" => tempLevel(offset)
+      case "pointer" => pointerLevel(offset)
+      case "static" => staticLevel(fileName, offset)
+      case "constant" => constantLevel(offset)
+      case _ => throw new Exception("Unknown VM segment \"" + segment + "\" at line " + lineNum)
+    }
   }
 
   def gt(instruction: Int): String = {
@@ -251,74 +357,4 @@ object AInstructions {
     // return the result to the main program
     not
   }
-
-  def push(segment: String, offset: Int, fileName: String): String = {
-    // function for function-level segments: local / argument / this / that
-    def functionLevel(segment: String, offset: Int): String = {
-      var push = "@" + offset + "\n" // load the offset into A
-      push += "D=A\n" // move the offset into D
-      push += "@" + segment + "\n" // load the address of segment into A
-      push += "A=M+D\n" // calculate the segment + offset into A
-      push += "D=M\n" // load the data of segment + offset into D
-      push += "@SP\n" // load the SP into A
-      push += "A=M\n" // load the pointer of the next free room
-      push += "M=D\n" // save the data of segment + offset into the free room
-      push += "@SP\n" // load the SP into A
-      push += "M=M+1\n" // move the pointer to the next free room
-
-      // return the result to the main program
-      push
-    }
-
-    // function for pointer / temp segments
-    def pointerTempLevel(segment: String, offset: Int): String = {
-      var push = "@" + offset + "\n" // load the offset into A
-      push += "D=A\n" // store the offset in D
-      if (segment.equals("pointer"))
-        push += "@3\n" // load the pointer value (3) into A
-      else
-      push += "@5\n" // load the temp value (5) into A
-      push += "A=A+D\n" // calculate the value of segment + offset
-      push += "D=M\n" // load the data of segment + offset into D
-      push += "@SP\n" // load SP into A
-      push += "A=M\n" // get the next free room pointer into A
-      push += "M=D\n" // store the data of segment + offset from D into the free room
-      push += "@SP\n" // load the SP into A
-      push += "M=M+1\n" // move the pointer to the next free room
-      push // return the result to the main program
-    }
-
-    // function for static segments
-    def staticLevel(fileName: String, offset: Int): String = {
-      var push = "@" + fileName + "." + offset + "\n" // load the pointer to fileName.offset into A
-      push += "D=M\n" // store the value of fileName.offset into D
-      push += "@SP\n" // load SP into A
-      push += "A=M\n" // get the next free room pointer into A
-      push += "M=D\n" // store the data of fileName.offset from D into the free room
-      push += "@SP\n" // load the SP into A
-      push += "M=M+1\n" // move the pointer to the next free room
-      push // return the result to the main program
-    }
-
-    def constantLevel(value: Int): String = {
-      var push = "@" + value + "\n" // load the value into A
-      push += "D=A\n" // put the value from A into D
-      push += "@SP\n" // get the SP into A
-      push += "A=M\n" // load the next free room into A
-      push += "M=D\n" // store value from D into the free room
-      push += "@SP\n" // get the SP into A
-      push += "M=M+1\n" // move the pointer to the next free room
-      push // return the result to the main program
-    }
-
-    // return the result of the right segment type
-    if (segment.equals("local") || segment.equals("argument") || segment.equals("this") || segment.equals("that"))
-      return functionLevel(segment, offset)
-    if (segment.equals("pointer") || segment.equals("temp"))
-      return pointerTempLevel(segment, offset)
-    if (segment.equals("static"))
-      return staticLevel(fileName, offset)
-    constantLevel(offset)
-  }
-
 }

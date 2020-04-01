@@ -38,10 +38,10 @@ object MainCompiler {
         case "and" => asmCode += and()
         case "or" => asmCode += or()
         case "not" => asmCode += not()
-        case "pop" => asmCode += pop(words(1), words(2).toInt, file.getName)
-        case "push" => asmCode += push(words(1), words(2).toInt, file.getName)
+        case "pop" => asmCode += pop(words(1), words(2).toInt, file.getName, lineNum)
+        case "push" => asmCode += push(words(1), words(2).toInt, file.getName, lineNum)
         case "//" | "" =>
-        case _ => throw new Exception("Unknown VM instruction at line " + lineNum)
+        case _ => throw new Exception("Unknown VM instruction at line " + lineNum + " in " + file.getName)
       }
 
     }
