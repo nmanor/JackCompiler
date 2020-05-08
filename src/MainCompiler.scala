@@ -2,6 +2,7 @@ import java.io.{BufferedWriter, File, FileWriter}
 
 import Exercise0.Main.getListOfFiles
 import Exercise1.AInstructions._
+import Exercise2.MInstructions._
 
 import scala.io.{Source, StdIn}
 
@@ -40,10 +41,11 @@ object MainCompiler {
         case "not" => asmCode += not()
         case "pop" => asmCode += pop(words(1), words(2).toInt, file.getName, lineNum)
         case "push" => asmCode += push(words(1), words(2).toInt, file.getName, lineNum)
+        case "call" => asmCode += call(words(1), words(2).toInt)
+        case "function" => asmCode += function(words(1), words(2).toInt, lineNum)
         case "//" | "" =>
         case _ => throw new Exception("Unknown VM instruction at line " + lineNum + " in " + file.getName)
       }
-
     }
 
     // close the open file
