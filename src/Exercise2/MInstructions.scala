@@ -1,5 +1,7 @@
 package Exercise2
 
+import scala.sys.process.processInternal._
+
 object MInstructions {
 
   def call(g: String, n: Int): String = {
@@ -96,6 +98,31 @@ object MInstructions {
 
     // return the result to the main program
     retrn
+  }
+
+  def label(file: File,string: String): String = {
+    var label = "("+ file.getName()+"."+string+")\n" // connect file name to label name
+
+    // return the result to the main program
+    label
+  }
+  def goto(file: File,string: String): String = {
+    var goto = "@"+ file.getName()+"."+string+"\n" // connect file name to label name and load address
+    goto += "0;JMP\n"                               //jump to label
+    // return the result to the main program
+    goto
+  }
+
+    def ifgoto(file: File,string: String): String = {
+    var ifgoto ="@SP\n" // load sp
+      ifgoto += "M=M-1\n"// put the 1st pointer in SP
+      ifgoto += "A=M\n"
+      ifgoto += "D=M\n"
+      ifgoto += "@"+ file.getName()+"."+string+"\n" // load the label address
+      ifgoto += "D;JNE\n" // jump on condition
+
+    // return the result to the main program
+      ifgoto
   }
 
 }

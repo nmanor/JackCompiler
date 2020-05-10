@@ -43,6 +43,9 @@ object MainCompiler {
         case "push" => asmCode += push(words(1), words(2).toInt, file.getName, lineNum)
         case "call" => asmCode += call(words(1), words(2).toInt)
         case "function" => asmCode += function(words(1), words(2).toInt, lineNum)
+        case "label" => asmCode += label(file,words(1))
+        case "goto" => asmCode += label(file,words(1))
+        case "if-goto" => asmCode += label(file,words(1))
         case "//" | "" =>
         case _ => throw new Exception("Unknown VM instruction at line " + lineNum + " in " + file.getName)
       }
