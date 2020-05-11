@@ -10,12 +10,26 @@ object MainCompiler {
   def main(args: Array[String]): Unit = {
     print("Enter the path of the directory: ")
     val path = StdIn.readLine()
-    for (file <- getListOfFiles(path)) {
-      compileToASM(file)
+    val listOfFiles = getListOfFiles(path)
+    var asmCode = ""
+    if (listOfFiles.length > 1) {
+      asmCode = bootstrap()
     }
+
+    for (file <- listOfFiles) {
+      asmCode += compileToASM(file)
+    }
+
+    // create the ASM file and open it for writing
+    val asmFile = new File(path + "\\" + new File(path).getName + ".asm")
+    val writer = new BufferedWriter(new FileWriter(asmFile))
+
+    // write the content
+    writer.write(asmCode)
+    writer.close()
   }
 
-  def compileToASM(file: File): Unit = {
+  def compileToASM(file: File): String = {
     var asmCode = ""
     var lineNum = 0
     val fileContent = Source.fromFile(file)
@@ -26,26 +40,27 @@ object MainCompiler {
       lineNum += 1
 
       // split the line into separated words
-      val words = line.split(" ")
+      val words = line.split("\\s+")
 
       // call to the right function and add it to the asm code
       words(0) match {
-        case "add" => asmCode += add()
-        case "sub" => asmCode += sub()
-        case "neg" => asmCode += neg()
-        case "eq" => asmCode += eql(lineNum)
-        case "gt" => asmCode += gt(lineNum)
-        case "lt" => asmCode += lt(lineNum)
-        case "and" => asmCode += and()
-        case "or" => asmCode += or()
-        case "not" => asmCode += not()
-        case "pop" => asmCode += pop(words(1), words(2).toInt, file.getName, lineNum)
-        case "push" => asmCode += push(words(1), words(2).toInt, file.getName, lineNum)
-        case "call" => asmCode += call(words(1), words(2).toInt)
-        case "function" => asmCode += function(words(1), words(2).toInt, lineNum)
-        case "label" => asmCode += label(file,words(1))
-        case "goto" => asmCode += label(file,words(1))
-        case "if-goto" => asmCode += label(file,words(1))
+        case "add" => asmCode += "// " + line + "\n" + add()
+        case "sub" => asmCode += "// " + line + "\n" + sub()
+        case "neg" => asmCode += "// " + line + "\n" + neg()
+        case "eq" => asmCode += "// " + line + "\n" + eql(lineNum)
+        case "gt" => asmCode += "// " + line + "\n" + gt(lineNum)
+        case "lt" => asmCode += "// " + line + "\n" + lt(lineNum)
+        case "and" => asmCode += "// " + line + "\n" + and()
+        case "or" => asmCode += "// " + line + "\n" + or()
+        case "not" => asmCode += "// " + line + "\n" + not()
+        case "pop" => asmCode += "// " + line + "\n" + pop(words(1), words(2).toInt, file.getName, lineNum)
+        case "push" => asmCode += "// " + line + "\n" + push(words(1), words(2).toInt, file.getName, lineNum)
+        case "call" => asmCode += "// " + line + "\n" + call(words(1), words(2).toInt)
+        case "function" => asmCode += "// " + line + "\n" + function(words(1), words(2).toInt)
+        case "return" => asmCode += "// " + line + "\n" + retrn()
+        case "label" => asmCode += "// " + line + "\n" + label(file.getParentFile.getName, words(1))
+        case "goto" => asmCode += "// " + line + "\n" + goto(file.getParentFile.getName, words(1))
+        case "if-goto" => asmCode += "// " + line + "\n" + ifgoto(file.getParentFile.getName, words(1))
         case "//" | "" =>
         case _ => throw new Exception("Unknown VM instruction at line " + lineNum + " in " + file.getName)
       }
@@ -54,13 +69,8 @@ object MainCompiler {
     // close the open file
     fileContent.close()
 
-    // create the ASM file and open it for writing
-    val asmFile = new File(file.getPath.replace(".vm", ".asm"))
-    val writer = new BufferedWriter(new FileWriter(asmFile))
-
-    // write the content
-    writer.write(asmCode)
-    writer.close()
+    // return the asm code of the current file
+    asmCode
   }
 
 }
