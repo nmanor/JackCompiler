@@ -3,7 +3,7 @@ package Exercise1
 import scala.collection.immutable.HashMap
 
 object AInstructions {
-  val asmNameOf = HashMap("local" -> "LCL", "argument" -> "ARG", "this" -> "THIS", "that" -> "THAT", "temp" -> "TMP")
+  val asmNameOf: Map[String, String] = HashMap("local" -> "LCL", "argument" -> "ARG", "this" -> "THIS", "that" -> "THAT", "temp" -> "TMP")
 
   def pop(segment: String, offset: Int, fileName: String, lineNum: Int): String = {
     // function for function-level segments: local / argument / this / that
@@ -277,28 +277,29 @@ object AInstructions {
 
   def lt(instruction: Int): String = {
     var lt = "@SP\n" // get the location of the first empty place in the stack (SP)
-    lt += "A=M-1\n" // get the location of the 1st value in the stack
-    lt += "D=M\n" // get the value of the 1st
-    lt += "A=A-1\n" // get the location of the 2nd
-    lt += "D=D-M\n" // subtract the 2nd from the 1st
-    lt += "@LT_" + instruction + "\n" // load the location of the code if LT is true
-    lt += "D;JGE\n" // jump to the label if X is really LT then Y
-    lt += "D=0\n" // load FALSE into D
-    lt += "@SP\n" // load the location of SP into A
-    lt += "A=M-1\n" // load the address of the 1st value in the stack
-    lt += "A=A-1\n" // get the location of the 2nd
-    lt += "M=D\n" // put the result in the 2nd place
-    lt += "@NOT_LT_" + instruction + "\n" // load the location of the code if LT is false
-    lt += "0;JMP\n" // unconditional jump
-    lt += "(LT_" + instruction + ")\n" // set the label
-    lt += "D=-1\n" // load TRUE into D
-    lt += "@SP\n" // load the location of SP into A
-    lt += "A=M-1\n" // load the address of the 1st value in the stack
-    lt += "A=A-1\n" // get the location of the 2nd
-    lt += "M=D\n" // put the result in the 2nd place
-    lt += "(NOT_LT_" + instruction + ")\n" // set the label
-    lt += "@SP\n" // load the location of SP into A
-    lt += "M=M-1\n" // save the new SP
+    lt += "M=M-1\n" // set the next value address into SP
+    lt += "@SP\n" // get the location of the first empty place in the stack (SP)
+    lt += "A=M\n" // load the next value address into A
+    lt += "D=M\n" // load the next value into D
+    lt += "@SP\n" // get the location of the first empty place in the stack (SP)
+    lt += "M=M-1\n" // set the next value address into SP
+    lt += "@SP\n" // get the location of the first empty place in the stack (SP)
+    lt += "A=M\n" // put the address of the next value into A
+    lt += "A=M\n" // put the value itself into A
+    lt += "D=D-A\n" // set D to be D-A
+    lt += "@LT_" + instruction + "\n" // load the address of the TRUE label
+    lt += "D;JGT\n" // jump to TRUE if D > 0
+    lt += "@NOT_LT_" + instruction + "\n" // else, load the address of the FALSE label
+    lt += "D=0\n" // set D to be 0
+    lt += "D;JEQ\n" // jump to the FALSE label
+    lt += "(LT_" + instruction + ")\n" // set the TRUE label
+    lt += "D=-1\n" // set D to be -1
+    lt += "(NOT_LT_" + instruction + ")\n" // set the FALSE label
+    lt += "@SP\n" // load SP into A
+    lt += "A=M\n" // A = RAM[A]
+    lt += "M=D\n" // RAM[next free address] = -1
+    lt += "@SP\n" // load SP
+    lt += "M=M+1\n" // set the next free sapce
 
     // return the result to the main program
     lt
