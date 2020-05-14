@@ -81,27 +81,27 @@ object MInstructions {
     retrn
   }
 
-  def label(directoryName: String, string: String): String = {
-    val label = "(" + directoryName + "." + string + ")\n" // connect file name to label name
+  def label(fileName: String, string: String): String = {
+    val label = "(" + fileName + "." + string + ")\n" // connect file name to label name
 
     // return the result to the main program
     label
   }
 
-  def goto(directoryName: String, string: String): String = {
-    var goto = "@" + directoryName + "." + string + "\n" // connect file name to label name and load address
+  def goto(fileName: String, string: String): String = {
+    var goto = "@" + fileName + "." + string + "\n" // connect file name to label name and load address
     goto += "0; JMP\n" //jump to label
 
     // return the result to the main program
     goto
   }
 
-  def ifgoto(directoryName: String, string: String): String = {
+  def ifgoto(fileName: String, string: String): String = {
     var ifgoto = "@SP\n" // load sp
     ifgoto += "M=M-1\n" // put the 1st pointer in SP
     ifgoto += "A=M\n"
     ifgoto += "D=M\n"
-    ifgoto += "@" + directoryName + "." + string + "\n" // load the label address
+    ifgoto += "@" + fileName + "." + string + "\n" // load the label address
     ifgoto += "D; JNE\n" // jump on condition
 
     // return the result to the main program

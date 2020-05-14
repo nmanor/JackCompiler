@@ -58,9 +58,9 @@ object MainCompiler {
         case "call" => asmCode += "// " + line + "\n" + call(words(1), words(2).toInt)
         case "function" => asmCode += "// " + line + "\n" + function(words(1), words(2).toInt)
         case "return" => asmCode += "// " + line + "\n" + retrn()
-        case "label" => asmCode += "// " + line + "\n" + label(file.getParentFile.getName, words(1))
-        case "goto" => asmCode += "// " + line + "\n" + goto(file.getParentFile.getName, words(1))
-        case "if-goto" => asmCode += "// " + line + "\n" + ifgoto(file.getParentFile.getName, words(1))
+        case "label" => asmCode += "// " + line + "\n" + label(file.getName, words(1))
+        case "goto" => asmCode += "// " + line + "\n" + goto(file.getName, words(1))
+        case "if-goto" => asmCode += "// " + line + "\n" + ifgoto(file.getName, words(1))
         case "//" | "" =>
         case _ => throw new Exception("Unknown VM instruction at line " + lineNum + " in " + file.getName)
       }
