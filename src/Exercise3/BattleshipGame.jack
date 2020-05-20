@@ -1,0 +1,289 @@
+class BattleshipGame {
+
+    field Board board;
+    field int x, y, guesses, curLocation, trueAttacks;
+    field Array attacks;
+
+    constructor BattleshipGame new() {
+        var int i, j;
+        var Array inArr;
+
+        // Initialize the entire attacks to 0
+        let attacks = Array.new(10);
+        let i = 0;
+        while(i < 10)
+        {
+            let attacks[i] = Array.new(10);
+            let inArr = attacks[i];
+            let j = 0;
+            while(j < 10)
+            {
+                let inArr[j] = 0;
+                let j = j + 1;
+            }
+            let i = i + 1;
+        }
+
+        do Output.println();
+        do Output.println();
+        do Output.println();
+        do Output.println();
+        do Output.printString("        Welcome to Battleship!");
+        do Output.println();
+
+        let guesses = Keyboard.readInt("        Enter number of guesses:");
+        let board = Board.new(guesses);
+
+        let curLocation = 1122;
+        let x = 0;
+        let y = 0;
+        let trueAttacks = 0;
+
+        do moveCourser(0);
+
+        return this;
+    }
+
+    method void drawBoard(){
+        var int i, j;
+        var Array inArr;
+
+        do Screen.drawLine(30, 35, 190, 35);
+        do Screen.drawLine(190, 35, 190, 176);
+        do Screen.drawLine(30, 176, 190, 176);
+        do Screen.drawLine(30, 35, 30, 176);
+
+        do Output.moveCursor(2, 7);
+        do Output.printString("Target: ");
+        do Output.printInt(x + 1);
+        do Output.printString(", ");
+        do Output.printInt(y + 1);
+        do Output.moveCursor(16, 3);
+        do Output.printString("Press space to attack");
+        do Output.moveCursor(8, 30);
+        do Output.printString("You have ");
+        do Output.printInt(guesses);
+        do Output.printString(" attacks left");
+        do Output.moveCursor(9, 30);
+        do Output.printString("You found ");
+        do Output.printInt(trueAttacks);
+        do Output.printString("/16 picecs");
+
+        let i = 0;
+        while(i < 10)
+        {
+            let inArr = attacks[i];
+            let j = 0;
+            while(j < 10)
+            {
+                if(inArr[j] < 0){
+                    do falseAttack(inArr[j] * -1);
+                }
+                if(inArr[j] > 0){
+                    do trueAttack(inArr[j] * 1);
+                }
+                let j = j + 1;
+            }
+            let i = i + 1;
+        }
+
+        return;
+    }
+
+     /** Starts the game. Handles inputs from the user that controls
+     *  the square movement direction and size. */
+     method void run() {
+        var char key;
+        var boolean exit;
+
+        let exit = false;
+
+        while (~exit) {
+            // waits for a key to be pressed.
+            while (key = 0) {
+                let key = Keyboard.keyPressed();
+            }
+
+            if (key = 81) {
+                let exit = true;
+            }
+            if (key = 32){
+                if(guesses > 1){
+                    do attack();
+                }
+                else{
+                    do gameOver();
+                }
+            }
+            if (key = 131) {
+                do moveY(-1);
+            }
+            if (key = 133) {
+                do moveY(1);
+            }
+            if (key = 130) {
+                do moveX(-1);
+            }
+            if (key = 132) {
+                do moveX(1);
+            }
+
+            // waits for the key to be released.
+            while (~(key = 0)) {
+                let key = Keyboard.keyPressed();
+            }
+        }
+            
+        return;
+	}
+
+    method void moveCourser(int location) {
+        var int memAddress;
+
+        do Screen.clearScreen();
+        do drawBoard();
+
+        let curLocation = curLocation + location;
+        let memAddress = 16384+curLocation;
+        do Memory.poke(memAddress+0, 2016);
+        do Memory.poke(memAddress+32, 7224);
+        do Memory.poke(memAddress+64, 12300);
+        do Memory.poke(memAddress+96, 25542);
+        do Memory.poke(memAddress+128, 20082);
+        do Memory.poke(memAddress+160, -14317);
+        do Memory.poke(memAddress+192, -26215);
+        do Memory.poke(memAddress+224, -27703);
+        do Memory.poke(memAddress+256, -27703);
+        do Memory.poke(memAddress+288, -26215);
+        do Memory.poke(memAddress+320, -14317);
+        do Memory.poke(memAddress+352, 20082);
+        do Memory.poke(memAddress+384, 25542);
+        do Memory.poke(memAddress+416, 12300);
+        do Memory.poke(memAddress+448, 7224);
+        do Memory.poke(memAddress+480, 2016);
+
+        return;
+    }
+
+    method void moveX(int offset){
+        var int temp;
+        let temp = x + offset;
+
+        if(temp < 10 & temp > -1){
+            let x = x + offset;
+            if(offset = -1){
+                do moveCourser(-1);
+            }
+            else {
+                do moveCourser(1);
+            }
+        }
+        return;
+    }
+
+    method void moveY(int offset){
+        var int temp;
+        let temp = y + offset;
+
+        if(temp < 10 & temp > -1){
+            let y = y + offset;
+            if(offset = -1){
+                do moveCourser(-448);
+            }
+            else {
+                do moveCourser(448);
+            }
+        }
+        return;
+    }
+
+    method void attack(){
+        var Array inArr;
+        let guesses = guesses - 1;
+        if (board.attack(x, y)){
+            let inArr = attacks[y];
+            let inArr[x] = curLocation;
+            do trueAttack(curLocation);
+            let trueAttacks = trueAttacks + 1;
+        }
+        else {
+            let inArr = attacks[y];
+            let inArr[x] = curLocation * -1;
+            do falseAttack(curLocation);
+        }
+        return;
+    }
+
+    method void gameOver(){
+        var char key;
+        var boolean exit;
+
+        let exit = false;
+
+        while (~exit) {
+            // waits for a key to be pressed.
+            while (key = 0) {
+                do Screen.clearScreen();
+                do Sys.wait(600);
+                do Output.moveCursor(10, 20);
+                do Output.printString("GAME OVER!");
+                do Output.moveCursor(11, 20);
+                do Output.printString("You lose");
+                do Sys.wait(4000);
+                let key = Keyboard.keyPressed();
+            }
+
+            // waits for the key to be released.
+            while (~(key = 0)) {
+                let key = Keyboard.keyPressed();
+            }
+        }
+            
+        return;
+    }
+    
+    method void falseAttack(int location) {
+        var int memAddress;
+        let memAddress = 16384 + location;
+        do Memory.poke(memAddress+0, -16381);
+        do Memory.poke(memAddress+32, -8185);
+        do Memory.poke(memAddress+64, 28686);
+        do Memory.poke(memAddress+96, 14364);
+        do Memory.poke(memAddress+128, 7224);
+        do Memory.poke(memAddress+160, 3696);
+        do Memory.poke(memAddress+192, 2016);
+        do Memory.poke(memAddress+224, 960);
+        do Memory.poke(memAddress+256, 960);
+        do Memory.poke(memAddress+288, 2016);
+        do Memory.poke(memAddress+320, 3696);
+        do Memory.poke(memAddress+352, 7224);
+        do Memory.poke(memAddress+384, 14364);
+        do Memory.poke(memAddress+416, 28686);
+        do Memory.poke(memAddress+448, -8185);
+        do Memory.poke(memAddress+480, -16381);
+        return;
+    }
+
+    method void trueAttack(int location) {
+        var int memAddress;
+        let memAddress = 16384 + location;
+        do Memory.poke(memAddress+0, 0);
+        do Memory.poke(memAddress+32, 32766);
+        do Memory.poke(memAddress+64, 32766);
+        do Memory.poke(memAddress+96, 32766);
+        do Memory.poke(memAddress+128, 32766);
+        do Memory.poke(memAddress+160, 32766);
+        do Memory.poke(memAddress+192, 32766);
+        do Memory.poke(memAddress+224, 32766);
+        do Memory.poke(memAddress+256, 32766);
+        do Memory.poke(memAddress+288, 32766);
+        do Memory.poke(memAddress+320, 32766);
+        do Memory.poke(memAddress+352, 32766);
+        do Memory.poke(memAddress+384, 32766);
+        do Memory.poke(memAddress+416, 32766);
+        do Memory.poke(memAddress+448, 32766);
+        do Memory.poke(memAddress+480, 0);
+        return;
+    }
+
+}

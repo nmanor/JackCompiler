@@ -1,0 +1,204 @@
+class Board {
+
+    // The board array
+    field Array board;
+
+    // Creates a new game board and reboots the submarines
+    constructor Board new(int age){
+        var int i, j, direction, x, y;
+        var Array inArr;
+        var boolean bool;
+        var Random random;
+
+        // Initialize the entire board to false
+        let board = Array.new(10);
+        let i = 0;
+        while(i < 10)
+        {
+            let board[i] = Array.new(10);
+            let inArr = board[i];
+            let j = 0;
+            while(j < 10)
+            {
+                let inArr[j] = false;
+                let j = j + 1;
+            }
+            let i = i + 1;
+        }
+
+
+        let random = Random.new(age);
+
+        // Position the submarine at length 5
+        do Screen.clearScreen();
+        let direction = random.randRange(1);
+        if(direction = 0)
+        {
+            let x = random.randRange(9);
+            let y = random.randRange(4);
+            let j = 0;
+            while(j < 5)
+            {
+                let inArr = board[y + j];
+                let inArr[x] = true;
+                let j = j + 1;
+            }
+        }
+        else
+        {
+            let x = random.randRange(4);
+            let y = random.randRange(9);
+            let j = 0;
+            let inArr = board[y];
+            while(j < 5)
+            {
+                let inArr[x + j] = true;
+                let j = j + 1;
+            }
+        }
+
+        // Position the submarine at length 4
+        let direction = random.randRange(1);
+        if(direction = 0)
+        {
+            let x = random.randRange(9);
+            let y = random.randRange(5);
+            let j = 0;
+            while(j < 4)
+            {
+                let inArr = board[y + j];
+                let inArr[x] = true;
+                let j = j + 1;
+            }
+        }
+        else
+        {
+            let x = random.randRange(5);
+            let y = random.randRange(9);
+            let j = 0;
+            let inArr = board[y];
+            while(j < 4)
+            {
+                let inArr[x + j] = true;
+                let j = j + 1;
+            }
+        }
+
+        // Position the submarine at length 3
+        let direction = random.randRange(1);
+        if(direction = 0)
+        {
+            let x = random.randRange(9);
+            let y = random.randRange(6);
+            let j = 0;
+            while(j < 3)
+            {
+                let inArr = board[y + j];
+                let inArr[x] = true;
+                let j = j + 1;
+            }
+        }
+        else
+        {
+            let x = random.randRange(6);
+            let y = random.randRange(9);
+            let j = 0;
+            let inArr = board[y];
+            while(j < 3)
+            {
+                let inArr[x + j] = true;
+                let j = j + 1;
+            }
+        }
+
+        // Position the submarine at length 2
+        let direction = random.randRange(1);
+        if(direction = 0)
+        {
+            let x = random.randRange(9);
+            let y = random.randRange(7);
+            let j = 0;
+            while(j < 2)
+            {
+                let inArr = board[y + j];
+                let inArr[x] = true;
+                let j = j + 1;
+            }
+        }
+        else
+        {
+            let x = random.randRange(7);
+            let y = random.randRange(9);
+            let j = 0;
+            let inArr = board[y];
+            while(j < 2)
+            {
+                let inArr[x + j] = true;
+                let j = j + 1;
+            }
+        }
+
+        // Position the submarine at length 2
+        let direction = random.randRange(1);
+        if(direction = 0)
+        {
+            let x = random.randRange(9);
+            let y = random.randRange(7);
+            let j = 0;
+            while(j < 2)
+            {
+                let inArr = board[y + j];
+                let inArr[x] = true;
+                let j = j + 1;
+            }
+        }
+        else
+        {
+            let x = random.randRange(7);
+            let y = random.randRange(9);
+            let j = 0;
+            let inArr = board[y];
+            while(j < 2)
+            {
+                let inArr[x + j] = true;
+                let j = j + 1;
+            }
+        }
+
+
+        /*do Output.moveCursor(0, 0);
+        let i = 0;
+        while(i < 10)
+        {
+            let inArr = board[i];
+            let j = 0;
+            while(j < 10)
+            {
+                let bool = inArr[j];
+                if(bool)
+                { do Output.printString("+");}
+                else
+                { do Output.printString("-");}
+                let j = j + 1;
+            }
+            do Output.println();
+            let i = i + 1;
+        }*/
+
+        return this;
+    }
+
+    /** Deallocates the object's memory. */
+    method void dispose() {
+        do Array.dispose();
+        do Memory.deAlloc(this);
+        return;
+    }
+
+    method boolean attack(int x, int y){
+        var Array inArr;
+        let inArr = board[x];
+        return inArr[y];
+    }
+
+}
