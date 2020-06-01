@@ -15,9 +15,9 @@ object Main {
     print("Enter the path of the directory: ")
     val path = StdIn.readLine()
     var i = 1
-    for(file <- getListOfFiles(path)) {
+    for (file <- getListOfFiles(path, "vm")) {
       println(file.getName)
-      if(file.getName == "hello.vm")
+      if (file.getName == "hello.vm")
         moveVMtoASM(file)
       else
         addNumberToFile(file, i)
@@ -29,7 +29,7 @@ object Main {
    * @param path : The path of the directory with all the VM files
    * @return List of File that ends with .vm
    */
-  def getListOfFiles(path: String): List[File] = {
+  def getListOfFiles(path: String, kind: String): List[File] = {
     // open the path as File
     val dir = new File(path)
 
@@ -41,7 +41,7 @@ object Main {
     val allFiles = dir.listFiles.filter(_.isFile).toList
 
     // return only the files that ends with ".vm"
-    allFiles.filter(file => file.getName.endsWith(".vm"))
+    allFiles.filter(file => file.getName.endsWith("." + kind))
   }
 
 
