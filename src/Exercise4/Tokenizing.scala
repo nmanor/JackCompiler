@@ -4,7 +4,6 @@ import java.io._
 
 import scala.io.Source
 import scala.util.matching.Regex
-import scala.xml.XML.loadString
 
 object Tokenizing {
   val keyword: Regex = new Regex("^class|^constructor|^function|^method|^field|^static|^var|^int|^char" +
@@ -53,31 +52,26 @@ object Tokenizing {
     while (newCode.length > 0) {
       if (keyword.findFirstIn(newCode).toList.nonEmpty) {
         val token = keyword.findFirstIn(newCode).toList.head
-        println(token + " - keyword")
-        result = result :+ ((token.replace(" ", ""), "keyword"))
+        result = result :+ ((token, "keyword"))
         newCode = newCode.substring(token.length)
       }
       else if (symbol.findFirstIn(newCode).toList.nonEmpty) {
         val token = symbol.findFirstIn(newCode).toList.head
-        println(token + " - symbol")
         result = result :+ ((token, "symbol"))
         newCode = newCode.substring(token.length)
       }
       else if (integerConstant.findFirstIn(newCode).toList.nonEmpty) {
         val token = integerConstant.findFirstIn(newCode).toList.head
-        println(token + " - integerConstant")
         result = result :+ ((token, "integerConstant"))
         newCode = newCode.substring(token.length)
       }
       else if (stringConstant.findFirstIn(newCode).toList.nonEmpty) {
         val token = stringConstant.findFirstIn(newCode).toList.head
-        println(token + " - stringConstant")
         result = result :+ ((token.substring(1, token.length - 1), "stringConstant"))
         newCode = newCode.substring(token.length)
       }
       else if (identifier.findFirstIn(newCode).toList.nonEmpty) {
         val token = identifier.findFirstIn(newCode).toList.head
-        println(token + " - identifier")
         result = result :+ ((token, "identifier"))
         newCode = newCode.substring(token.length)
       }
@@ -93,19 +87,17 @@ object Tokenizing {
 
   // Function that accepts tokens list and exports them to XML
   def tokensListToXML(tokens: List[(String, String)], file: File, path: String): Unit = {
-    val xml = <tokens>
-      {tokens.map(token => loadString("<" + token._2 + "> " + token._1
+    val xml = "<tokens>\n" + {
+      tokens.map(token => "<" + token._2 + "> " + token._1
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
         .replaceAll("\"", "&quet;")
-        + " </" + token._2 + ">"))}
-    </tokens>
-    val prettyPrinter = new scala.xml.PrettyPrinter(80, 0)
-    val prettyXml = prettyPrinter.format(xml)
-    val xmlfile = new File(path + "\\" + file.getName + "_examT.xml")
+        + " </" + token._2 + ">\n").mkString
+    } + "</tokens>\n"
+    val xmlfile = new File(path + "\\" + file.getName.split('.').head + "_examT.xml")
     val bw = new BufferedWriter(new FileWriter(xmlfile))
-    bw.write(prettyXml)
+    bw.write(xml)
     bw.close()
   }
 
