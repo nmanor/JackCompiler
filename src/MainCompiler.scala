@@ -1,15 +1,15 @@
-import java.io.{BufferedWriter, File, FileWriter}
+import java.io.File
 
-import Exercise0.Main.getListOfFiles
 import Exercise1.AInstructions._
 import Exercise2.MInstructions._
-import Exercise4.Tokenizing._
+import Exercise4.Parsing._
 
-import scala.io.{Source, StdIn}
+import scala.io.Source
 
 object MainCompiler {
   def main(args: Array[String]): Unit = {
-    print("Enter the path of the directory: ")
+    parse()
+    /*print("Enter the path of the directory: ")
     val path = StdIn.readLine()
     var listOfFiles = getListOfFiles(path, "vm")
     var asmCode = ""
@@ -32,7 +32,7 @@ object MainCompiler {
     listOfFiles = getListOfFiles(path, "jack")
     for (file <- listOfFiles) {
       tokenizer(file, path)
-    }
+    }*/
   }
 
   def compileToASM(file: File): String = {
