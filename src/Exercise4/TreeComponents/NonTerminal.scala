@@ -5,10 +5,14 @@ class NonTerminal extends Rule {
   // List all the sub rules of the rule
   var subRules: List[Rule] = List()
 
+  // Parameter that determines whether to export the xml with the rule itself or only its sub rules
+  var transparent: Boolean = false
+
   // Constructor
-  def this(ruleType: String) {
+  def this(ruleType: String, transparent: Boolean = false) {
     this()
     this.ruleType = ruleType
+    this.transparent = transparent
   }
 
   // Function that adds a new rule to the subRules list
@@ -17,15 +21,8 @@ class NonTerminal extends Rule {
       subRules = this.subRules :+ rule
   }
 
-  // Function that adds a list of rules to the subRules list
-  def addSubRule(rules: List[Rule]): Unit = {
-    for (rule <- rules)
-      if (rule != null)
-        subRules = this.subRules :+ rule
-  }
-
   // Overrides the function that returns the content in XML so that it returns the XML for all sons of the rule
-  override def getXmlContent: String = "<" + ruleType + ">\n" +
-    subRules.map(rule => "  " + rule.getXmlContent).mkString +
-    "</" + ruleType + ">\n"
+  override def getXmlContent: String =
+    if (transparent) subRules.map(rule => "  " + rule.getXmlContent).mkString
+    else "<" + ruleType + ">\n" + subRules.map(rule => "  " + rule.getXmlContent).mkString + "</" + ruleType + ">\n"
 }

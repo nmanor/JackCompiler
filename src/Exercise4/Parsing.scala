@@ -546,32 +546,32 @@ object Parsing {
   }
 
   //--
-  def subroutineCallRule(): List[Rule] = {
-    var root: List[Rule] = List()
+  def subroutineCallRule(): Rule = {
+    val root = new NonTerminal("subroutineCall", true)
 
     // Add the name of the subroutine / class / var name
     var token = popToken()
-    root = root :+ new Terminal(token._2, token._1)
+    root.addSubRule(new Terminal(token._2, token._1))
 
     if (matchToken(topToken(), ".")) {
       // Add the . sign
       token = popToken()
-      root = root :+ new Terminal(token._2, token._1)
+      root.addSubRule(new Terminal(token._2, token._1))
 
       // Add the subroutineName
-      root = root :+ subroutineNameRule()
+      root.addSubRule(subroutineNameRule())
     }
 
     // Add the ( sign
     token = popToken()
-    root = root :+ new Terminal(token._2, token._1)
+    root.addSubRule(new Terminal(token._2, token._1))
 
     // Add the expressionList
-    root = root :+ expressionListRule()
+    root.addSubRule(expressionListRule())
 
     // Add the ) sign
     token = popToken()
-    root = root :+ new Terminal(token._2, token._1)
+    root.addSubRule(new Terminal(token._2, token._1))
 
     root
   }
