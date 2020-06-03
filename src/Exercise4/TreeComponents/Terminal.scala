@@ -13,5 +13,10 @@ class Terminal extends Rule {
   }
 
   // The override of the function that returns the rule as XML
-  override def getXmlContent: String = "<" + ruleType + "> " + terminal + " </" + ruleType + ">\n"
+  override def getXmlContent: String = "<" + ruleType + "> " + terminal
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll("\"", "&quet;") +
+    " </" + ruleType + ">\n"
 }

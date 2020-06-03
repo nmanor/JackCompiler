@@ -13,11 +13,19 @@ class NonTerminal extends Rule {
 
   // Function that adds a new rule to the subRules list
   def addSubRule(rule: Rule): Unit = {
-    subRules = this.subRules :+ rule
+    if (rule != null)
+      subRules = this.subRules :+ rule
+  }
+
+  // Function that adds a list of rules to the subRules list
+  def addSubRule(rules: List[Rule]): Unit = {
+    for (rule <- rules)
+      if (rule != null)
+        subRules = this.subRules :+ rule
   }
 
   // Overrides the function that returns the content in XML so that it returns the XML for all sons of the rule
   override def getXmlContent: String = "<" + ruleType + ">\n" +
-    subRules.map(rule => rule.getXmlContent).mkString +
+    subRules.map(rule => "  " + rule.getXmlContent).mkString +
     "</" + ruleType + ">\n"
 }

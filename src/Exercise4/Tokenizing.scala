@@ -16,7 +16,7 @@ object Tokenizing {
 
 
   // The main Tokenizing function: get the path to the directory and plot the xxxT.xml file
-  def tokenizer(file: File, path: String): Unit = {
+  def tokenizer(file: File, path: String): List[(String, String)] = {
     val fileContent = Source.fromFile(file)
     var code = fileContent.mkString
     fileContent.close()
@@ -25,6 +25,7 @@ object Tokenizing {
     code = code.replaceAll("[\n\r]", "")
     val tokens = findTokens(code)
     tokensListToXML(tokens, file, path)
+    tokens
   }
 
 
@@ -95,8 +96,8 @@ object Tokenizing {
         .replaceAll("\"", "&quet;")
         + " </" + token._2 + ">\n").mkString
     } + "</tokens>\n"
-    val xmlfile = new File(path + "\\" + file.getName.split('.').head + "_examT.xml")
-    val bw = new BufferedWriter(new FileWriter(xmlfile))
+    val xmlFile = new File(path + "\\" + file.getName.split('.').head + "T_.xml")
+    val bw = new BufferedWriter(new FileWriter(xmlFile))
     bw.write(xml)
     bw.close()
   }
