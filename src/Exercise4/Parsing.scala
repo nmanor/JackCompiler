@@ -57,13 +57,13 @@ object Parsing {
 
 
   // Function that accepts syntax tree and exports it to XML
-  def syntaxTreeToXml(rule: Rule, file: File, path: String): Unit = {
+  def syntaxTreeToXml(syntaxTree: Rule, file: File, path: String): Unit = {
     val prettyPrinter = new scala.xml.PrettyPrinter(80, 2)
     // val xml = prettyPrinter.format(scala.xml.XML.loadString(rule.getXmlContent))
     val xmlFile = new File(path + "\\" + file.getName.split('.').head + "_.xml")
     val bw = new BufferedWriter(new FileWriter(xmlFile))
     // bw.write(xml)
-    bw.write(rule.getXmlContent)
+    bw.write(syntaxTree.getXmlContent)
     bw.close()
   }
 
@@ -497,6 +497,7 @@ object Parsing {
       popToken()
 
       // Check if need to call to subroutineCall
+      // x = y();  or  x = y.z();  or  x = y[i];  or  x = y;
       if (matchToken(topToken(), "(", ".")) {
         pushToken()
         root.addSubRule(subroutineCallRule())
