@@ -7,4 +7,7 @@ abstract class Rule {
 
   // An abstract function that returns the contents of the entire rule as XML
   def getXmlContent: String
+
+  // Indexer
+  def apply(index: Int): Rule
 }

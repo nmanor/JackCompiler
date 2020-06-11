@@ -19,4 +19,7 @@ class Terminal extends Rule {
     .replaceAll(">", "&gt;")
     .replaceAll("\"", "&quet;") +
     " </" + ruleType + ">\n"
+
+  // The indexer return the this, no matter what the rule is
+  override def apply(index: Int): Rule = this
 }

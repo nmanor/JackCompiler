@@ -6,8 +6,8 @@ import scala.io.Source
 import scala.util.matching.Regex
 
 object Tokenizing {
-  val keyword: Regex = new Regex("^class|^constructor|^function|^method|^field|^static|^var|^int|^char" +
-    "|^boolean|^void|^true|^false|^null|^this|^let|^do|^if|^else|^while|^return")
+  val keyword: Regex = new Regex("^(class|constructor|function|method|field|static|var|int|char" +
+    "|boolean|void|true|false|null|this|let|do|if|else|while|return)\\W")
   val symbol: Regex = new Regex("^\\{|^\\}|^\\(|^\\)|^\\[|^\\]|^\\.|^\\,|^\\;|^\\+|^\\-|^\\*|^\\/|^\\&|^\\||^\\<|^\\>|^\\=|^\\~")
   val integerConstant: Regex = new Regex("^(3276[0-7]|327[0-5][0-9]|32[0-6][0-9]{2}|3[01][0-9]{3}|[12][0-9]{4}|999[0-9]|99[0-8][0-9]|9[0-8][0-9]{2}|[1-8][0-9]{3}|99[0-9]|9[0-8][0-9]|[1-8][0-9]{2}|9[0-9]|[1-8][0-9]|[0-9])")
   val stringConstant: Regex = new Regex("^\"[^\"]*\"")
@@ -52,7 +52,7 @@ object Tokenizing {
 
     while (newCode.length > 0) {
       if (keyword.findFirstIn(newCode).toList.nonEmpty) {
-        val token = keyword.findFirstIn(newCode).toList.head
+        val token = keyword.findFirstIn(newCode).toList.head.dropRight(1)
         result = result :+ ((token, "keyword"))
         newCode = newCode.substring(token.length)
       }

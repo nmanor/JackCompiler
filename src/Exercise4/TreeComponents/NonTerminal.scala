@@ -25,4 +25,7 @@ class NonTerminal extends Rule {
   override def getXmlContent: String =
     if (transparent) subRules.map(rule => "  " + rule.getXmlContent).mkString
     else "<" + ruleType + ">\n" + subRules.map(rule => "  " + rule.getXmlContent).mkString + "</" + ruleType + ">\n"
+
+  // Return the sub rule at the index 'index'
+  override def apply(index: Int): Rule = if (subRules.isEmpty || index >= subRules.length) null else subRules(index)
 }
