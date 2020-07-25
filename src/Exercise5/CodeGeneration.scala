@@ -121,7 +121,7 @@ object CodeGeneration {
       vmCode += "pop pointer 0\n"
     }
 
-    // Add the constructor allocation
+    // Add the method allocation
     if (subroutineKind == "method") {
       vmCode += "push " + methodTable("this") + "\n"
       vmCode += "pop pointer 0\n"
